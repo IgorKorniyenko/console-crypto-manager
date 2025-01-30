@@ -1,6 +1,7 @@
 import MenuStack.addMenuToStack
 import MenuStack.menuStack
 import MenuStack.actualMenu
+import repository.DatabaseController
 import menus.AuthenticationMenu
 import menus.Menu
 import models.CountryCode
@@ -15,6 +16,7 @@ object MenuStack {
 
     fun goBack() {
         menuStack.removeFirst()
+        if (menuStack.size == 1) Session.currentUser = null
     }
 
     fun actualMenu(): Menu {
@@ -34,6 +36,8 @@ object Session {
 
 class App {
     fun run() {
+        DatabaseController.initDatabase()
+
         addMenuToStack(AuthenticationMenu())
 
         while (menuStack.isNotEmpty()) {

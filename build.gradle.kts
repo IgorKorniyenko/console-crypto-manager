@@ -13,6 +13,8 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+    implementation("org.xerial:sqlite-jdbc:3.41.2.2")
+    implementation("com.zaxxer:HikariCP:5.0.1")
 }
 
 tasks.test {

@@ -2,58 +2,52 @@ package auth
 
 import Session
 import lang.Strings
-import models.CountryCode
-import models.Roles
-import models.User
+import models.enums.LoginResponse
+import models.enums.CountryCode
+import repository.UserRepository
+import utils.CryptoHelper
 import utils.Utils
-
-enum class LoginResponse {
-    OK, CANCELLED, FAILED
-}
 
 class AuthManager {
     fun signIn(): LoginResponse {
-
         val username = Utils.readInput(Strings.username[Session.lang]?: Strings.username[CountryCode.ENG]!!)
         if (username == "\\exit") return LoginResponse.CANCELLED
 
         val password = Utils.readInput(Strings.password[Session.lang]?: Strings.password[CountryCode.ENG]!!)
         if (password == "\\exit") return LoginResponse.CANCELLED
 
-        return if (isUserRegistered(username, password)) {
-            LoginResponse.OK
-        } else {
-            LoginResponse.FAILED
-        }
-    }
-
-    private fun isUserRegistered(username: String, password: String): Boolean {
-        val users = Utils.readUsers()
-        val user = users.find { it.username == username }
-
-        if (user != null ) {
-            if(user.password == password) {
+        val user = UserRepository.getUser(username)
+        if (user != null) {
+            val decryptedPassword = CryptoHelper.decrypt(user.password)
+            if (decryptedPassword == password) {
                 Session.currentUser = user
-                return true
+                return LoginResponse.OK
             }
         }
-        return false
+        return LoginResponse.FAILED
     }
 
     fun signUp(): LoginResponse {
+        var response = LoginResponse.OK
+
         val username = Utils.readInput(Strings.username[Session.lang]?: Strings.username[CountryCode.ENG]!!)
-        if (username == "\\exit") return LoginResponse.CANCELLED
+        if (username == "\\exit") response = LoginResponse.CANCELLED
+
+        val user = UserRepository.getUser(username)
+        if (user != null) {
+            response = LoginResponse.USED
+        }
 
         val password = Utils.readInput(Strings.password[Session.lang]?: Strings.password[CountryCode.ENG]!!)
-        if (password == "\\exit") return LoginResponse.CANCELLED
+        if (password == "\\exit") response =  LoginResponse.CANCELLED
 
-        if (!isUserRegistered(username, password)){
-            val users = Utils.readUsers().toMutableList()
-            users.add(User(username, password, Roles.USER))
-            Utils.saveUsers(users)
-            return LoginResponse.OK
+        val encryptedPass = CryptoHelper.encrypt(password)
+
+        val result = UserRepository.insertUser(username, encryptedPass)
+        return if (result) {
+            LoginResponse.OK
         } else {
-            return LoginResponse.FAILED
+            LoginResponse.FAILED
         }
     }
 

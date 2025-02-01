@@ -1,4 +1,4 @@
-package models
+package models.enums
 
 enum class CountryCode {
     ES, UA, ENG

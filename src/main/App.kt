@@ -42,6 +42,8 @@ class App {
     }
 }
 fun main() {
+    DatabaseController.initDatabase()
+
     val app = App()
     app.run()
 }

@@ -1,9 +1,9 @@
 package menus
 
 import auth.AuthManager
-import auth.LoginResponse
 import MenuStack.exitApp
 import MenuStack.addMenuToStack
+import models.enums.LoginResponse
 import utils.Utils
 
 
@@ -47,12 +47,13 @@ class AuthenticationMenu: Menu() {
         do {
             response = authManager.signUp()
 
-            if (response == LoginResponse.OK) {
-                println("User has been registered successfully. Now you can login.")
-            } else {
-                println("Error registering user. Try again with different username")
+            when (response) {
+                LoginResponse.OK -> println("User has been registered successfully. Now you can login.")
+                LoginResponse.USED -> println("Provided username is already in use. Please choose another one")
+                else -> println("Error occurred when saving user. Please try later")
             }
-        } while (response == LoginResponse.FAILED)
+
+        } while (response == LoginResponse.FAILED || response == LoginResponse.USED)
     }
 }
 

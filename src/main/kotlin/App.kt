@@ -4,7 +4,7 @@ import MenuStack.actualMenu
 import repository.DatabaseController
 import menus.AuthenticationMenu
 import menus.Menu
-import models.CountryCode
+import models.enums.CountryCode
 import models.User
 
 object MenuStack {
@@ -21,6 +21,11 @@ object MenuStack {
 
     fun actualMenu(): Menu {
         return menuStack.first()
+    }
+
+    fun reload(menu: Menu) {
+        menuStack.removeFirst()
+        menuStack.addFirst(menu)
     }
 
     fun exitApp() {

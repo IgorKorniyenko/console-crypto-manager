@@ -1,6 +1,6 @@
 package lang
 
-import models.CountryCode
+import models.enums.CountryCode
 
 object Strings {
     val username = mapOf<CountryCode, String>(

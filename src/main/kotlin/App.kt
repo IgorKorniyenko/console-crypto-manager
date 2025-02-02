@@ -2,7 +2,7 @@ import MenuStack.addMenuToStack
 import MenuStack.menuStack
 import MenuStack.actualMenu
 import repository.DatabaseController
-import menus.AuthenticationMenu
+import auth.AuthenticationMenu
 import menus.Menu
 import models.enums.CountryCode
 import models.User

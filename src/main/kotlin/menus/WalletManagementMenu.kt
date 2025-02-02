@@ -12,7 +12,7 @@ class WalletManagementMenu: Menu() {
     private val options = listOf(
         "1. View My Assets",
         "2. Add Assets",
-        "3. Modify Assets",
+        "3. Decrease Assets",
         "4. Remove Assets",
         "0. Back"
     )
@@ -23,9 +23,28 @@ class WalletManagementMenu: Menu() {
         when (Utils.readInput("Select an option: ").toIntOrNull()) {
             1 -> showAssets()
             2 -> addAssets()
+            3 -> decreaseAsset()
+            4 -> deleteAsset()
             0 -> goBack()
             else -> println("Invalid option")
         }
+    }
+
+    private fun showAssets() {
+        val walletService = WalletManagementService()
+        val userAssets = walletService.getAssets(Session.currentUser!!.id)
+
+        if (userAssets.isNotEmpty()) {
+            userAssets.forEach { asset ->
+                println("%-5s %-15s %-5s %-3s".format(
+                    asset.coinName,
+                    asset.quantity,
+                    "500.00",
+                    "EUR"
+                ))
+            }
+        }
+        Utils.readInput("Press enter to back to menu.")
     }
 
     private fun addAssets() {
@@ -34,7 +53,7 @@ class WalletManagementMenu: Menu() {
         val selectedToken = getCoinName()
         if (selectedToken == "\\exit") return
 
-        val quantity = getQuantity()
+        val quantity = getQuantity("add")
         if (quantity == 0.0) return
 
         val originalPrice = getOriginalPrice()
@@ -71,12 +90,18 @@ class WalletManagementMenu: Menu() {
         return selectedToken
     }
 
-    private fun getQuantity(): Double {
+    private fun getQuantity(mode: String): Double {
         var isValidInput = false
         var convertedQuantity: Double?
 
+        val prompt = if (mode == "add") {
+            "Insert bought quantity: "
+        } else {
+            "Insert quantity to decrease: "
+        }
+
         do {
-            val quantity = Utils.readInput("Insert bought quantity: ")
+            val quantity = Utils.readInput(prompt)
             if (quantity == "\\exit") return 0.0
 
             convertedQuantity = quantity.toDoubleOrNull()
@@ -109,21 +134,46 @@ class WalletManagementMenu: Menu() {
         return convertedPrice?:0.0
     }
 
-    private fun showAssets() {
+    private fun decreaseAsset() {
         val walletService = WalletManagementService()
-        val userAssets = walletService.getAssets(Session.currentUser!!.id)
 
-        if (userAssets.isNotEmpty()) {
-            userAssets.forEach { asset ->
-                println("%-3s %-10s %-5s %-5s %-3s".format(
-                    asset.id,
-                    asset.coinName,
-                    asset.quantity,
-                    "500.00",
-                    "EUR"
-                ))
+        val selectedToken = getCoinName()
+        if (selectedToken == "\\exit") return
+
+        val existingCoin = walletService.getAsset(selectedToken, Session.currentUser!!.id)
+
+        if (existingCoin != null) {
+            println("Actual $selectedToken balance: ${existingCoin.quantity}")
+            val quantity = getQuantity("decrease")
+            if (quantity == 0.0) return
+            existingCoin.quantity -= quantity
+
+            if (walletService.updateAsset(existingCoin)) {
+                println("$selectedToken quantity has been successfully updated.")
+            } else {
+                println("$selectedToken has not been updated due to internal error. Please try again later.")
             }
+        } else {
+            println("You can't decrease $selectedToken balance because you don't have any")
         }
-        Utils.readInput("Press enter to back to menu.")
+    }
+
+    private fun deleteAsset() {
+        val walletService = WalletManagementService()
+
+        val selectedToken = getCoinName()
+        if (selectedToken == "\\exit") return
+
+        val existingCoin = walletService.getAsset(selectedToken, Session.currentUser!!.id)
+
+        if (existingCoin != null) {
+            if (walletService.deleteAsset(selectedToken, existingCoin.userId)) {
+                println("$selectedToken has been removed from you wallet")
+            } else {
+                println("Error occurred when removing $selectedToken. Please try again later.")
+            }
+        } else {
+            println("You cant delete $selectedToken because you don't have it in you wallet.")
+        }
     }
 }

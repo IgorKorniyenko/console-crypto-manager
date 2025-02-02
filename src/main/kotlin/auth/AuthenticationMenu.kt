@@ -1,8 +1,9 @@
-package menus
+package auth
 
-import auth.AuthManager
 import MenuStack.exitApp
 import MenuStack.addMenuToStack
+import menus.MainMenu
+import menus.Menu
 import models.enums.LoginResponse
 import utils.Utils
 

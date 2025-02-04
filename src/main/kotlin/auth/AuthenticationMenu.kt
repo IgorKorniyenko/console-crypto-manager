@@ -1,40 +1,84 @@
 package auth
 
-import MenuStack.exitApp
+import MenuStack
 import MenuStack.addMenuToStack
+import com.googlecode.lanterna.TextColor
+import com.googlecode.lanterna.input.KeyType
 import menus.MainMenu
 import menus.Menu
 import models.enums.LoginResponse
-import utils.Utils
+import utils.ScreenManager
 
 
 class AuthenticationMenu: Menu() {
     override val menuWidth = 60
-    private val options = listOf<String>(
-        "1. Sign In",
-        "2. Sign Up",
-        "0. Exit"
+    private val options = listOf(
+        "Sign In",
+        "Sign Up",
+        "Exit"
     )
     private val authManager = AuthManager()
+    private var running = true
 
     override fun run() {
-        print(surroundOptions(options))
+        val screen = ScreenManager.screen
+        val graphics = ScreenManager.graphics
 
-        when (Utils.readInput("Select an option: ").toIntOrNull()) {
-            1 -> signIn()
-            2 -> signUp()
-            0 -> exitApp()
-            else -> println("Invalid option")
+        var selectedIndex = 0
+
+        while (running) {
+            ScreenManager.clearScreen()
+
+            for (i in options.indices) {
+                if (i == selectedIndex) {
+                    graphics.foregroundColor = TextColor.ANSI.YELLOW
+                    graphics.putString(10, 5 + i, "> ${options[i]} <")
+                } else {
+                    graphics.foregroundColor = TextColor.ANSI.WHITE
+                    graphics.putString(10, 5 + i, "  ${options[i]}  ")
+                }
+            }
+
+            ScreenManager.refreshScreen()
+
+            val inputKey = screen.readInput()
+
+            when (inputKey.keyType) {
+                KeyType.ArrowUp -> if (selectedIndex > 0)  selectedIndex--
+                KeyType.ArrowDown -> if (selectedIndex < options.size - 1) selectedIndex++
+                KeyType.Enter -> {
+                    when (selectedIndex) {
+                        0 -> {
+                            signIn()
+                        }
+                        1 -> signUp()
+                        else -> {
+                            running = false
+                            MenuStack.goBack()
+                        }
+                    }
+                }
+                else -> {}
+            }
         }
     }
 
     private fun signIn() {
         var response: LoginResponse
+        val screen = ScreenManager.screen
+        val graphics = ScreenManager.graphics
+
+        graphics.foregroundColor = TextColor.ANSI.WHITE
+        graphics.putString(10, 5, "Username: ")
+        
 
         do {
+            ScreenManager.clearScreen()
+
             response = authManager.signIn()
 
             if (response == LoginResponse.OK) {
+
                 addMenuToStack(MainMenu())
             } else if (response == LoginResponse.FAILED) {
                 println("Invalid username or password. Try again or type \\exit to close login screen.")

@@ -1,42 +1,47 @@
 import MenuStack.addMenuToStack
-import MenuStack.menuStack
-import MenuStack.actualMenu
 import repository.DatabaseController
 import auth.AuthenticationMenu
 import menus.Menu
 import models.enums.CountryCode
 import models.User
+import utils.ScreenManager
 
 object MenuStack {
-    val menuStack = ArrayDeque<Menu>()
+    private val menuStack = ArrayDeque<Menu>()
 
     fun addMenuToStack(menu: Menu) {
         menuStack.addFirst(menu)
+        runCurrentMenu()
     }
 
     fun goBack() {
-        menuStack.removeFirst()
-        if (menuStack.size == 1) Session.currentUser = null
+        if (menuStack.isNotEmpty()) {
+            menuStack.removeFirst()
+        }
+
+        if (menuStack.isNotEmpty()) {
+            if (menuStack.size == 1) Session.closeSession()
+            runCurrentMenu()
+        } else {
+            ScreenManager.stopScreen()
+        }
     }
 
-    fun actualMenu(): Menu {
-        return menuStack.first()
+    private fun runCurrentMenu() {
+        ScreenManager.clearScreen()
+        menuStack.first().run()
+        ScreenManager.refreshScreen()
     }
 
-    fun reload(menu: Menu) {
-        menuStack.removeFirst()
-        menuStack.addFirst(menu)
-    }
-
-    fun exitApp() {
-        println("Closing app..")
-        menuStack.clear()
-    }
 }
 
 object Session {
     var currentUser: User? = null
-    val lang = CountryCode.ENG
+    var lang = CountryCode.ENG
+
+    fun closeSession() {
+        currentUser = null
+    }
 }
 
 class App {
@@ -44,10 +49,11 @@ class App {
         DatabaseController.initDatabase()
 
         addMenuToStack(AuthenticationMenu())
-
+        /**
         while (menuStack.isNotEmpty()) {
             actualMenu().run()
         }
+        **/
     }
 }
 fun main() {

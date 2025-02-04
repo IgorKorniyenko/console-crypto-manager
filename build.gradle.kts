@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "2.0.21"
     kotlin("plugin.serialization") version "1.5.31"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "dev.ikorniyenko"
@@ -20,6 +21,12 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "AppKt" // 🚀 Reemplaza con tu paquete/clase principal
+    }
 }
 kotlin {
     jvmToolchain(17)

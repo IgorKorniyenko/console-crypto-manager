@@ -46,7 +46,7 @@ object Session {
 
 class App {
     fun run() {
-        DatabaseController.initDatabase()
+        DatabaseController.createDatabaseIfNotExists()
 
         addMenuToStack(AuthenticationMenu())
         /**

@@ -1,5 +1,6 @@
 package utils
 
+import com.googlecode.lanterna.input.KeyType
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -39,5 +40,46 @@ object Utils {
             success = false
         }
         return success
+    }
+
+    fun readUserInput(xPosition: Int, yPosition: Int, maskInput: Boolean = false): String {
+        val screen = ScreenManager.screen
+        val graphics = ScreenManager.graphics
+        val inputBuffer = StringBuilder()
+        var running = true
+
+        var cursorX = xPosition
+        graphics.putString(8, yPosition, "> ")
+        ScreenManager.refreshScreen()
+
+        while (running) {
+            val key = screen.readInput()
+            when (key.keyType) {
+                KeyType.Enter -> {
+                    running = false
+                }
+                KeyType.Backspace -> if (inputBuffer.isNotEmpty()) {
+                    inputBuffer.deleteCharAt(inputBuffer.length - 1)
+                    cursorX--
+
+                    graphics.putString(cursorX, yPosition, " ")
+                    ScreenManager.refreshScreen()
+                }
+                KeyType.Character -> {
+                    inputBuffer.append(key.character)
+                    val displayChar = if (maskInput) '*' else key.character
+
+                    graphics.putString(cursorX, yPosition, displayChar.toString())
+                    cursorX++
+                    ScreenManager.refreshScreen()
+                }
+                KeyType.Escape -> {
+                    running = false
+                    inputBuffer.clear().append("\\exit")
+                }
+                else -> {}
+            }
+        }
+        return inputBuffer.toString()
     }
 }

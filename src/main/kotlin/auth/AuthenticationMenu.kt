@@ -3,9 +3,10 @@ package auth
 import MenuStack
 import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.input.KeyType
+import lang.Strings
 import menus.MainMenu
 import menus.Menu
-import models.enums.LoginResponse
+import models.enums.CountryCode
 import utils.ScreenManager
 import utils.Utils
 
@@ -66,64 +67,118 @@ class AuthenticationMenu: Menu() {
     }
 
     private fun signIn() {
-        var signInRunning = true
-        var username = ""
-        var password = ""
-        var loginError = false
-
-        while (signInRunning) {
+        while (true) {
             ScreenManager.clearScreen()
 
-            if (loginError) {
+            val username = promptUserInput("Username: ", 5)
+            if (username.isBlank()) return
+
+            val password = promptUserInput("Password: ", 7, true)
+            if (password.isBlank()) return
+
+            if (authManager.signIn(username, password)) {
+                MenuStack.addMenuToStack(MainMenu())
+                return
+            } else {
                 graphics.foregroundColor = TextColor.ANSI.RED
                 graphics.putString(10, 9, "Login failed. Please try again.")
                 ScreenManager.refreshScreen()
-            }
-
-            while (signInRunning && (username == "")) {
-                graphics.foregroundColor = TextColor.ANSI.WHITE
-                graphics.putString(10, 5, "Username: ")
-                ScreenManager.refreshScreen()
-                username = Utils.readUserInput(20, 5)
-
-                if (username == "\\exit") signInRunning = false
-            }
-            while (signInRunning && (password == "")) {
-                graphics.foregroundColor = TextColor.ANSI.WHITE
-                graphics.putString(10, 7, "Password: ")
-                ScreenManager.refreshScreen()
-                password = Utils.readUserInput(20, 7, true)
-
-                if (password == "\\exit") signInRunning = false
-            }
-
-            if (signInRunning) {
-                if (authManager.signIn(username, password)) {
-                    signInRunning = false
-                    loginError = false
-                    MenuStack.addMenuToStack(MainMenu())
-                } else {
-                    username = ""
-                    password = ""
-                    loginError = true
-                }
+                Thread.sleep(1000)
             }
         }
     }
 
     private fun signUp() {
-        var response: LoginResponse
+        var signUpRunning = true
+        var username = ""
+        var password = ""
+        var signupError = false
 
-        do {
-            response = authManager.signUp()
+        while (signUpRunning) {
+            ScreenManager.clearScreen()
 
-            when (response) {
-                LoginResponse.OK -> println("User has been registered successfully. Now you can login.")
-                LoginResponse.USED -> println("Provided username is already in use. Please choose another one")
-                else -> println("Error occurred when saving user. Please try later")
+            if (signupError) {
+                graphics.foregroundColor = TextColor.ANSI.RED
+                graphics.putString(10, 9, Strings.failedSignUp[CountryCode.ENG])
+                ScreenManager.refreshScreen()
             }
 
-        } while (response == LoginResponse.FAILED || response == LoginResponse.USED)
+            while (signUpRunning && (username == "")) {
+                username = promptUserInput(Strings.username[CountryCode.ENG]!!, 5)
+                if (username.isBlank()) signUpRunning = false
+
+                if (signUpRunning && !checkUsername(username)) {
+                    showError(Strings.invalidUsername[CountryCode.ENG]!!)
+                    clearLine(5, 20, username.length)
+                    username = ""
+                } else {
+                    clearLine(9, 10, Strings.invalidUsername[CountryCode.ENG]!!.length)
+                }
+            }
+
+            while (signUpRunning && (password == "")) {
+                password = promptUserInput(Strings.password[CountryCode.ENG]!!, 7)
+                if (password.isBlank()) signUpRunning = false
+
+                if (signUpRunning && !checkPassword(password)) {
+                    showError(Strings.invalidPassword[CountryCode.ENG]!!)
+                    clearLine(7, 20, password.length)
+                    password = ""
+                } else {
+                    clearLine(9, 10, Strings.invalidPassword[CountryCode.ENG]!!.length)
+                }
+            }
+
+            if (authManager.signUp(username, password)) {
+                signUpRunning = false
+                signupError = false
+            } else {
+                signupError = true
+                username = ""
+                password = ""
+            }
+        }
+    }
+
+    private fun promptUserInput(prompt: String, y: Int, isPassword: Boolean = false): String {
+        var input = ""
+
+        while (input.isBlank()) {
+            graphics.foregroundColor = TextColor.ANSI.WHITE
+            graphics.putString(10, y, prompt)
+            ScreenManager.refreshScreen()
+            input = Utils.readUserInput(20, y, isPassword)
+
+            if (input == "\\exit") return ""
+        }
+
+        return input
+    }
+
+    private fun showError(errorMessage: String) {
+        graphics.foregroundColor = TextColor.ANSI.RED
+        graphics.putString(10, 9, errorMessage)
+
+        ScreenManager.refreshScreen()
+    }
+
+    private fun clearLine(line: Int, start: Int, cleanLength: Int) {
+        graphics.putString(start, line, " ".repeat(cleanLength))
+        ScreenManager.refreshScreen()
+    }
+
+    private fun checkUsername(username: String): Boolean {
+        var result = false
+        val nameRegex = Regex(".*[A-Za-z].*[A-Za-z].*[A-Za-z].*")
+        if (nameRegex.matches(username)) {
+             if (!authManager.isUserRegistered(username)) result = true
+        }
+        return result
+    }
+
+    private fun checkPassword(password: String): Boolean {
+        val passwordRegex = Regex(".*[A-Za-z].*[A-Za-z].*[A-Za-z].*")
+        return passwordRegex.matches(password)
     }
 }
 

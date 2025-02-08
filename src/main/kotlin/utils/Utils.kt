@@ -1,5 +1,6 @@
 package utils
 
+import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.input.KeyType
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -81,5 +82,18 @@ object Utils {
             }
         }
         return inputBuffer.toString()
+    }
+
+    fun promptUserInput(prompt: String, y: Int, isPassword: Boolean = false): String {
+        var input = ""
+        val graphics = ScreenManager.graphics
+        while (input.isBlank()) {
+            graphics.foregroundColor = TextColor.ANSI.WHITE
+            graphics.putString(10, y, prompt)
+            ScreenManager.refreshScreen()
+            input = readUserInput(20, y, isPassword)
+            if (input == "\\exit") return ""
+        }
+        return input
     }
 }

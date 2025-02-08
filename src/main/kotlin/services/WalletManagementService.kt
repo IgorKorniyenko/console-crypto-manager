@@ -5,7 +5,7 @@ import repository.CoinsRepository
 
 class WalletManagementService {
     fun addAsset(coin: Coin): Boolean {
-        val registeredCoin = CoinsRepository.getCoin(coin.coinName, coin.userId)
+        val registeredCoin = CoinsRepository.getCoin(coin.coinName.toString(), coin.userId)
 
         if (registeredCoin != null) {
             registeredCoin.quantity += coin.quantity
@@ -29,11 +29,13 @@ class WalletManagementService {
 
     fun updateAsset(coin: Coin): Boolean {
         var result = false
-        val registeredCoin = CoinsRepository.getCoin(coin.coinName, coin.userId)
+        val registeredCoin = CoinsRepository.getCoin(coin.coinName.toString(), coin.userId)
 
         if (registeredCoin != null) {
-            if (registeredCoin.quantity > 0) {
+            if (coin.quantity > 0) {
                 result = CoinsRepository.updateCoin(coin)
+            } else {
+                result = CoinsRepository.deleteCoin(coin.coinName.toString(), coin.userId )
             }
         }
         return result

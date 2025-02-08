@@ -22,4 +22,16 @@ object Strings {
         CountryCode.ENG to "Invalid username or password. Try again or type \\exit to close login screen.",
     )
 
+    val invalidUsername = mapOf(
+        CountryCode.ENG to "Username is in use or has invalid format."
+    )
+
+    val invalidPassword = mapOf(
+        CountryCode.ENG to "Password must have at least 3 characters. Please try again"
+    )
+
+    val failedSignUp = mapOf(
+        CountryCode.ENG to "Sign up failed. Please try again."
+    )
+
 }

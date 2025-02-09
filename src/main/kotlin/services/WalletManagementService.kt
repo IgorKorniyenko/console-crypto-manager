@@ -2,6 +2,7 @@ package services
 
 import kotlinx.coroutines.runBlocking
 import models.Coin
+import models.Transaction
 import models.enums.CoinName
 import models.enums.CurrencyCode
 import repository.CoinGeckoRepository
@@ -12,14 +13,32 @@ import kotlin.math.ceil
 
 class WalletManagementService {
     fun addAsset(coin: Coin): Boolean {
+        var result = false
         val registeredCoin = CoinsRepository.getCoin(coin.coinName.toString(), coin.userId)
+        val mode: String
 
         if (registeredCoin != null) {
             registeredCoin.quantity += coin.quantity
-            return CoinsRepository.updateCoin(registeredCoin)
+            result = CoinsRepository.updateCoin(registeredCoin)
+            mode = "ADD"
         } else {
-            return CoinsRepository.insertCoin(coin)
+            result = CoinsRepository.insertCoin(coin)
+            mode = "NEW"
         }
+
+        if (result) {
+            val transaction = Transaction(
+                0,
+                coin.userId,
+                coin.coinName.toString(),
+                mode,
+                coin.quantity
+            )
+
+            TransactionService().addTransaction(transaction)
+        }
+
+        return result
     }
 
     fun checkIfCoinExists(coin: String): Boolean {
@@ -44,6 +63,18 @@ class WalletManagementService {
             } else {
                 CoinsRepository.deleteCoin(coin.coinName.toString(), coin.userId )
             }
+
+            if (result) {
+                val transaction = Transaction(
+                    0,
+                    coin.userId,
+                    coin.coinName.toString(),
+                    "DECREASE",
+                    coin.quantity
+                )
+
+                TransactionService().addTransaction(transaction)
+            }
         }
         return result
     }
@@ -54,6 +85,18 @@ class WalletManagementService {
 
         if (registeredCoin != null) {
             result = CoinsRepository.deleteCoin(coinName, userId)
+
+            if (result) {
+                val transaction = Transaction(
+                    0,
+                    userId,
+                    coinName,
+                    "DELETE",
+                    0.0
+                )
+
+                TransactionService().addTransaction(transaction)
+            }
         }
         return result
     }

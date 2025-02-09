@@ -17,6 +17,11 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.41.2.2")
     implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("com.googlecode.lanterna:lanterna:3.1.1")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.google.code.gson:gson:2.10")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 }
 
 tasks.test {
@@ -25,7 +30,7 @@ tasks.test {
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "AppKt" // 🚀 Reemplaza con tu paquete/clase principal
+        attributes["Main-Class"] = "AppKt"
     }
 }
 kotlin {

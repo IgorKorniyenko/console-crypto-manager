@@ -22,7 +22,7 @@ class MainMenu: Menu() {
     private var selectedIndex = 0
 
 
-    override fun run() {
+    override suspend fun run() {
         while (running) {
             drawOptions()
             evaluateOption()
@@ -43,7 +43,7 @@ class MainMenu: Menu() {
         ScreenManager.refreshScreen()
     }
 
-    private fun evaluateOption(){
+    private suspend fun evaluateOption(){
         val inputKey = screen.readInput()
 
         when (inputKey.keyType) {
@@ -63,7 +63,7 @@ class MainMenu: Menu() {
         }
     }
 
-    private fun walletManagement() {
+    private suspend fun walletManagement() {
         MenuStack.addMenuToStack(WalletManagementMenu())
     }
 }

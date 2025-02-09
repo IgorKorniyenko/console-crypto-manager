@@ -23,7 +23,7 @@ class AuthenticationMenu: Menu() {
     private val graphics = ScreenManager.graphics
     private var selectedIndex = 0
 
-    override fun run() {
+    override suspend fun run() {
         while (running) {
             drawOptions()
             evaluateOption()
@@ -46,7 +46,7 @@ class AuthenticationMenu: Menu() {
         ScreenManager.refreshScreen()
     }
 
-    private fun evaluateOption(){
+    private suspend fun evaluateOption(){
         val inputKey = screen.readInput()
 
         when (inputKey.keyType) {
@@ -66,7 +66,7 @@ class AuthenticationMenu: Menu() {
         }
     }
 
-    private fun signIn() {
+    private suspend fun signIn() {
         while (true) {
             ScreenManager.clearScreen()
 

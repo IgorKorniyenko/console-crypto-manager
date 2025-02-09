@@ -5,16 +5,17 @@ import menus.Menu
 import models.enums.CountryCode
 import models.User
 import utils.ScreenManager
+import kotlin.system.exitProcess
 
 object MenuStack {
     private val menuStack = ArrayDeque<Menu>()
 
-    fun addMenuToStack(menu: Menu) {
+    suspend fun addMenuToStack(menu: Menu) {
         menuStack.addFirst(menu)
         runCurrentMenu()
     }
 
-    fun goBack() {
+    suspend fun goBack() {
         if (menuStack.isNotEmpty()) {
             menuStack.removeFirst()
         }
@@ -24,10 +25,11 @@ object MenuStack {
             runCurrentMenu()
         } else {
             ScreenManager.stopScreen()
+            exitProcess(0)
         }
     }
 
-    private fun runCurrentMenu() {
+    private suspend fun runCurrentMenu() {
         ScreenManager.clearScreen()
         menuStack.first().run()
         ScreenManager.refreshScreen()
@@ -45,18 +47,13 @@ object Session {
 }
 
 class App {
-    fun run() {
+    suspend fun run() {
         DatabaseController.createDatabaseIfNotExists()
 
         addMenuToStack(AuthenticationMenu())
-        /**
-        while (menuStack.isNotEmpty()) {
-            actualMenu().run()
-        }
-        **/
     }
 }
-fun main() {
+suspend fun main() {
     val app = App()
     app.run()
 }

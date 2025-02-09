@@ -6,9 +6,11 @@ import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.input.KeyType
 import models.Coin
 import models.enums.CoinName
+import models.enums.CurrencyCode
 import services.WalletManagementService
 import utils.ScreenManager
 import utils.Utils
+import kotlinx.coroutines.*
 
 class WalletManagementMenu: Menu() {
     private val options = listOf(
@@ -24,12 +26,15 @@ class WalletManagementMenu: Menu() {
     private var selectedIndex = 0
     private val walletManagementService = WalletManagementService()
     private var lastY = 0
+    private val job = SupervisorJob()
+    private val coroutineScope = CoroutineScope(Dispatchers.Default + job)
 
-    override fun run() {
+    override suspend fun run() {
         while (running) {
             drawOptions(options)
             evaluateOption()
         }
+        coroutineScope.cancel()
     }
 
     private fun drawOptions(options: List<String>, isMainMenu: Boolean = true) {
@@ -48,7 +53,7 @@ class WalletManagementMenu: Menu() {
         ScreenManager.refreshScreen()
     }
 
-    private fun evaluateOption(){
+    private suspend fun evaluateOption(){
         val inputKey = screen.readInput()
 
         when (inputKey.keyType) {
@@ -79,7 +84,7 @@ class WalletManagementMenu: Menu() {
         }
     }
 
-    private fun showAssets() {
+    private suspend fun showAssets() {
         val userAssets = walletManagementService.getAssets(Session.currentUser!!.id)
 
         ScreenManager.clearScreen()
@@ -89,7 +94,11 @@ class WalletManagementMenu: Menu() {
                 graphics.foregroundColor = TextColor.ANSI.WHITE
                 graphics.putString(10, 5 + i, userAssets[i].coinName.toString())
                 graphics.putString(25, 5 + i, userAssets[i].quantity.toString())
-                graphics.putString(50, 5 + i, "500.00 EUR")
+                graphics.putString(50, 5 + i, "...")
+                coroutineScope.launch {
+                    printFormattedAmount(userAssets[i], 5 + i)
+                }
+
             }
             graphics.putString(10, userAssets.size + 7, "Press ESC key to go back")
             ScreenManager.refreshScreen()
@@ -98,6 +107,13 @@ class WalletManagementMenu: Menu() {
             ScreenManager.showError("Can't found assets for this user.", 10, 5)
             Thread.sleep(1000)
         }
+
+    }
+
+    private suspend fun printFormattedAmount(coin: Coin, y: Int) {
+        val formattedAmount = walletManagementService.getAssetAmountInFiat(coin.coinName, coin.quantity, CurrencyCode.USD)
+        graphics.putString(50, y, formattedAmount)
+        ScreenManager.refreshScreen()
 
     }
 

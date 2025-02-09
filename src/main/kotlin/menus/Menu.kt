@@ -6,7 +6,7 @@ abstract class Menu {
     open val menuWidth = 40
     private val leftPadding = 5
     private val verticalPadding = 1
-    abstract fun run()
+    abstract suspend fun run()
 
     fun surroundOptions(options: List<String>): String {
         val surroundedMenu = StringBuilder()

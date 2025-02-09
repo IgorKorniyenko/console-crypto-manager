@@ -1,7 +1,14 @@
 package services
 
+import kotlinx.coroutines.runBlocking
 import models.Coin
+import models.enums.CoinName
+import models.enums.CurrencyCode
+import repository.CoinGeckoRepository
 import repository.CoinsRepository
+import java.math.BigDecimal
+import java.math.RoundingMode
+import kotlin.math.ceil
 
 class WalletManagementService {
     fun addAsset(coin: Coin): Boolean {
@@ -32,10 +39,10 @@ class WalletManagementService {
         val registeredCoin = CoinsRepository.getCoin(coin.coinName.toString(), coin.userId)
 
         if (registeredCoin != null) {
-            if (coin.quantity > 0) {
-                result = CoinsRepository.updateCoin(coin)
+            result = if (coin.quantity > 0) {
+                CoinsRepository.updateCoin(coin)
             } else {
-                result = CoinsRepository.deleteCoin(coin.coinName.toString(), coin.userId )
+                CoinsRepository.deleteCoin(coin.coinName.toString(), coin.userId )
             }
         }
         return result
@@ -49,5 +56,21 @@ class WalletManagementService {
             result = CoinsRepository.deleteCoin(coinName, userId)
         }
         return result
+    }
+
+    suspend fun getAssetAmountInFiat(coin: CoinName, quantity: Double, currency: CurrencyCode): String {
+        var formattedAmount = "0.0 USD"
+
+            val coinPrice = CoinGeckoRepository().getCryptoPrice(coin.toString(), currency.toString())
+
+            coinPrice.forEach { (_, values) ->
+                values.forEach { (_, price) ->
+                    val roundedAmount = BigDecimal(price * quantity).setScale(2, RoundingMode.HALF_EVEN)
+                    formattedAmount = "$roundedAmount $currency"
+                }
+            }
+
+
+        return formattedAmount
     }
 }

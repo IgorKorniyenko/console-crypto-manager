@@ -1,4 +1,4 @@
-package menus
+package screens
 
 import MenuStack
 import Session
@@ -12,7 +12,7 @@ import utils.ScreenManager
 import utils.Utils
 import kotlinx.coroutines.*
 
-class WalletManagementMenu: Menu() {
+class WalletManagementScreen: Screen() {
     private val options = listOf(
         "View My Assets",
         "Add Assets",

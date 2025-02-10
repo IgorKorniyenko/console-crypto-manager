@@ -1,13 +1,14 @@
-package menus
+package screens
 
 import MenuStack
-import MenuStack.goBack
+import Session
 import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.input.KeyType
+import services.TransactionService
 import utils.ScreenManager
 import utils.Utils
 
-class MainMenu: Menu() {
+class MainScreen: Screen() {
     private val options = listOf(
         "Wallet Management",
         "Statistics and Reports",
@@ -53,6 +54,7 @@ class MainMenu: Menu() {
                 when (selectedIndex) {
                     0 -> walletManagement()
                     1 -> {}
+                    2 -> showMovements()
                     else -> {
                         running = false
                         MenuStack.goBack()
@@ -64,6 +66,10 @@ class MainMenu: Menu() {
     }
 
     private suspend fun walletManagement() {
-        MenuStack.addMenuToStack(WalletManagementMenu())
+        MenuStack.addMenuToStack(WalletManagementScreen())
+    }
+
+    private suspend fun showMovements() {
+        MenuStack.addMenuToStack(MovementsScreen())
     }
 }

@@ -1,8 +1,8 @@
-package menus
+package screens
 
 import java.lang.StringBuilder
 
-abstract class Menu {
+abstract class Screen {
     open val menuWidth = 40
     private val leftPadding = 5
     private val verticalPadding = 1

@@ -12,12 +12,14 @@ object DatabaseController {
         return DriverManager.getConnection(dbPath)
     }
 
+
     fun createDatabaseIfNotExists() {
         val dbFile = File(dbPath)
 
         if (!dbFile.parentFile.exists()) {
             dbFile.parentFile.mkdirs()
         }
+
 
         if (!dbFile.exists()) {
             val createUsersTable = """
@@ -39,10 +41,25 @@ object DatabaseController {
             );
             """.trimIndent()
 
+            val createTransactionsTable = """
+                CREATE TABLE IF NOT EXISTS Transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                userId INTEGER NOT NULL,
+                coinName TEXT NOT NULL,
+                operation TEXT NOT NULL,
+                transactionDate TEXT NOT NULL,
+                quantity DECIMAL(40,2) NOT NULL,
+                FOREIGN KEY (userId) REFERENCES Users(id)
+                );
+                """.trimIndent()
+
+
+
             connect().use { conn ->
                 val stmt = conn.createStatement()
                 stmt.execute(createUsersTable)
                 stmt.execute(createCoinsTable)
+                stmt.execute(createTransactionsTable)
             }
         }
     }

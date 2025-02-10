@@ -55,6 +55,7 @@ class MainScreen: Screen() {
                     0 -> walletManagement()
                     1 -> {}
                     2 -> showMovements()
+                    3 -> showConverter()
                     else -> {
                         running = false
                         MenuStack.goBack()
@@ -71,5 +72,9 @@ class MainScreen: Screen() {
 
     private suspend fun showMovements() {
         MenuStack.addMenuToStack(MovementsScreen())
+    }
+
+    private suspend fun showConverter() {
+        MenuStack.addMenuToStack(ConverterScreen())
     }
 }

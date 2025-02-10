@@ -4,14 +4,14 @@ import MenuStack
 import com.googlecode.lanterna.TextColor
 import com.googlecode.lanterna.input.KeyType
 import lang.Strings
-import menus.MainMenu
-import menus.Menu
+import screens.MainScreen
+import screens.Screen
 import models.enums.CountryCode
 import utils.ScreenManager
 import utils.Utils
 
 
-class AuthenticationMenu: Menu() {
+class AuthenticationScreen: Screen() {
     private val options = listOf(
         "Sign In",
         "Sign Up",
@@ -77,7 +77,7 @@ class AuthenticationMenu: Menu() {
             if (password.isBlank()) return
 
             if (authManager.signIn(username, password)) {
-                MenuStack.addMenuToStack(MainMenu())
+                MenuStack.addMenuToStack(MainScreen())
                 return
             } else {
                 graphics.foregroundColor = TextColor.ANSI.RED

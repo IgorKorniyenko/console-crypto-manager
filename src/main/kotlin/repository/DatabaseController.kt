@@ -12,6 +12,7 @@ object DatabaseController {
         return DriverManager.getConnection(dbPath)
     }
 
+
     fun createDatabaseIfNotExists() {
         val dbFile = File(dbPath)
 
@@ -46,6 +47,7 @@ object DatabaseController {
                 userId INTEGER NOT NULL,
                 coinName TEXT NOT NULL,
                 operation TEXT NOT NULL,
+                transactionDate TEXT NOT NULL,
                 quantity DECIMAL(40,2) NOT NULL,
                 FOREIGN KEY (userId) REFERENCES Users(id)
                 );

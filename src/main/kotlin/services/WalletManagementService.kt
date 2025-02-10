@@ -70,7 +70,7 @@ class WalletManagementService {
                     coin.userId,
                     coin.coinName.toString(),
                     "DECREASE",
-                    coin.quantity
+                    registeredCoin.quantity - coin.quantity
                 )
 
                 TransactionService().addTransaction(transaction)

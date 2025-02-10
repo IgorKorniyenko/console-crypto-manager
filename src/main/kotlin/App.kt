@@ -1,16 +1,16 @@
 import MenuStack.addMenuToStack
 import repository.DatabaseController
-import auth.AuthenticationMenu
-import menus.Menu
+import auth.AuthenticationScreen
+import screens.Screen
 import models.enums.CountryCode
 import models.User
 import utils.ScreenManager
 import kotlin.system.exitProcess
 
 object MenuStack {
-    private val menuStack = ArrayDeque<Menu>()
+    private val menuStack = ArrayDeque<Screen>()
 
-    suspend fun addMenuToStack(menu: Menu) {
+    suspend fun addMenuToStack(menu: Screen) {
         menuStack.addFirst(menu)
         runCurrentMenu()
     }
@@ -50,7 +50,7 @@ class App {
     suspend fun run() {
         DatabaseController.createDatabaseIfNotExists()
 
-        addMenuToStack(AuthenticationMenu())
+        addMenuToStack(AuthenticationScreen())
     }
 }
 suspend fun main() {
